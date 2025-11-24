@@ -1,4 +1,5 @@
 ﻿using E_Commerce.Services_Abstraction;
+using E_Commerce.Shared;
 using E_Commerce.Shared.DTOs.ProductDtos;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 namespace E_Commerce.Presentation.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[Controller]")]
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -26,9 +27,9 @@ namespace E_Commerce.Presentation.Controllers
 
         [HttpGet]
 
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProducts()
+        public async Task<ActionResult<PaginatedResult<ProductDto>>> GetAllProducts([FromQuery]ProductQueryParams queryParams)
         {
-            var Products =await _productService.GetAllProductsAsync();
+            var Products =await _productService.GetAllProductsAsync(queryParams);
             return Ok(Products);
         }
 
