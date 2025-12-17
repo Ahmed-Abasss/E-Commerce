@@ -5,7 +5,10 @@ using E_Commerce.Persistence.Repositories;
 using E_Commerce.Services;
 using E_Commerce.Services.MappingProfiles;
 using E_Commerce.Services_Abstraction;
+using E_Commerce.Web.CustomMiddlewares;
 using E_Commerce.Web.Extensions;
+using E_Commerce.Web.Factories;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System.Threading.Tasks;
@@ -30,6 +33,11 @@ namespace E_Commerce.Web
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IBasketService, BasketService>();
+            builder.Services.AddScoped<ICacheRepository,CacheRepository>();
+            builder.Services.AddScoped<ICacheService,CacheService>();
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            options.InvalidModelStateResponseFactory = ApiResponseFactory.GenereateApiValidationResponse
+            );
             builder.Services.AddAutoMapper(typeof(ServiceAssemblyRefrence).Assembly);
 
             builder.Services.AddSingleton<IConnectionMultiplexer>(Sp =>
@@ -44,13 +52,40 @@ namespace E_Commerce.Web
             await app.MigrateDataAsync();
              await   app.SeedDatabaseAsync();
 
-            #endregion 
+            #endregion
             // Configure the HTTP request pipeline.
+
+            //app.Use(async (Context, Next) => 
+            //{
+            //    try
+            //    {
+            //            await Next.Invoke(Context);
+
+            //    }
+            //    catch (Exception ex)
+            //    {
+
+            //        Console.WriteLine($"exception message{ex.Message}");
+
+            //        Context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+            //        await Context.Response.WriteAsJsonAsync(new
+            //        {
+            //            StatusCode = StatusCodes.Status500InternalServerError,
+            //            Error = ex.Message
+            //        });
+            //    }
+            //});
+
+            app.UseMiddleware<ExceptionHandlerMiddleware>();
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+          
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
