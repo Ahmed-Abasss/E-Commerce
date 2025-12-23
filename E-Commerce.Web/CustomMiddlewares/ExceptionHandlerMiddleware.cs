@@ -43,9 +43,9 @@ namespace E_Commerce.Web.CustomMiddlewares
             }
         }
 
-        private static async Task NotFoundEndPoint(HttpContext context)
+        private static async Task NotFoundEndPoint(HttpContext context )
         {
-            if (context.Response.StatusCode == StatusCodes.Status404NotFound)
+            if (context.Response.StatusCode == StatusCodes.Status404NotFound && !context.Response.HasStarted)
             {
                 var response = new ProblemDetails()
                 {
